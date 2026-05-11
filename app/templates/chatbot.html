@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}AI Recruitment Assistant{% endblock %}
+
+{% block content %}
+
+<div class="chatbot-page">
+
+    <div class="chatbot-header">
+
+        <div>
+            <h1>AI Recruitment Assistant</h1>
+
+            <p>
+                Ask about resumes, ATS scores, interview prep,
+                hiring process and career guidance.
+            </p>
+        </div>
+
+        <div class="status-badge">
+            ● AI Online
+        </div>
+
+    </div>
+
+    <!-- Resume Analyzer -->
+
+    <div class="resume-analysis-box">
+
+        <h2>Resume ATS Analyzer</h2>
+
+        <form id="resume-form">
+
+            <input
+                type="file"
+                id="resume-file"
+                name="resume"
+                accept=".pdf,.doc,.docx"
+                required
+            >
+
+            <textarea
+                id="jd-text"
+                name="jd"
+                placeholder="Paste Job Description Here..."
+                required
+            ></textarea>
+
+            <button type="submit">
+                Analyze Resume
+            </button>
+
+        </form>
+
+        <div id="analysis-result"></div>
+
+    </div>
+
+    <!-- Chat Window -->
+
+    <div class="chat-window" id="chat-window">
+
+        <div class="bot-message">
+            👋 Hello! I'm your AI recruitment assistant.
+            How can I help you today?
+        </div>
+
+    </div>
+
+    <!-- Chat Input -->
+
+    <div class="chat-input-area">
+
+        <input
+            type="text"
+            id="user-input"
+            placeholder="Type your message..."
+        />
+
+        <button id="send-btn">
+            Send
+        </button>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+
+const sendBtn = document.getElementById("send-btn");
+const userInput = document.getElementById("user-input");
+const chatWindow = document.getElementById("chat-window");
+const resumeForm = document.getElementById("resume-form");
+
+/* =========================
+   CHATBOT
+========================= */
+
+sendBtn.addEventListener("click", sendMessage);
+
+userInput.addEventListener("keypress", function(e) {
+
+    if (e.key === "Enter") {
+        sendMessage();
+    }
+
+});
+
+async function sendMessage() {
+
+    const message = userInput.value.trim();
+
+    if (!message) return;
+
+    appendMessage(message, "user");
+    scrollToBottom();
+
+    userInput.value = "";
+
+    /* Typing animation */
+
+    const typingDiv = document.createElement("div");
+
+    typingDiv.className = "bot-message";
+
+    typingDiv.id = "typing-indicator";
+
+    typingDiv.innerHTML = `
+        <div class="typing">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    `;
+
+    chatWindow.appendChild(typingDiv);
+
+    scrollToBottom();
+
+    try {
+
+        const response = await fetch("/api/ai-chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                message: message
+            })
+
+        });
+
+        const data = await response.json();
+
+        document.getElementById("typing-indicator").remove();
+
+        if (data.error) {
+
+            appendMessage(
+                "⚠️ " + data.error,
+                "bot"
+            );
+
+            return;
+        }
+
+        appendMessage(
+            data.response || "No response received.",
+            "bot"
+        );
+
+    } catch (error) {
+
+        console.log(error);
+
+        const typing =
+            document.getElementById("typing-indicator");
+
+        if (typing) {
+            typing.remove();
+        }
+
+        appendMessage(
+            "⚠️ Sorry, something went wrong.",
+            "bot"
+        );
+    }
+}
+
+/* =========================
+   RESUME ANALYZER
+========================= */
+
+resumeForm.addEventListener(
+    "submit",
+    async function(e) {
+
+        e.preventDefault();
+
+        const formData = new FormData();
+
+        const resumeFile =
+            document.getElementById("resume-file").files[0];
+
+        const jdText =
+            document.getElementById("jd-text").value;
+
+        if (!resumeFile) {
+
+            alert("Please upload a resume.");
+
+            return;
+        }
+
+        formData.append("resume", resumeFile);
+        formData.append("jd", jdText);
+
+        const resultDiv =
+            document.getElementById("analysis-result");
+
+        resultDiv.innerHTML = `
+            <p>Analyzing resume...</p>
+        `;
+
+        try {
+
+            const response = await fetch(
+                "/api/analyze-resume",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+            if (data.error) {
+
+                resultDiv.innerHTML = `
+                    <p style="color:red;">
+                        ${data.error}
+                    </p>
+                `;
+
+                return;
+            }
+
+            resultDiv.innerHTML = `
+
+                <div class="analysis-card">
+
+                    <h3>
+                        ATS Score:
+                        ${data.final_ats_score}%
+                    </h3>
+
+                    <p>
+                        <strong>Keyword Score:</strong>
+                        ${data.keyword_score}%
+                    </p>
+
+                    <p>
+                        <strong>Semantic Score:</strong>
+                        ${data.semantic_score}%
+                    </p>
+
+                    <p>
+                        <strong>Matched Keywords:</strong>
+                        ${data.matched_keywords.join(", ")}
+                    </p>
+
+                    <h4>AI Analysis</h4>
+
+                    <pre>${data.ai_analysis}</pre>
+
+                </div>
+            `;
+
+        } catch(error) {
+
+            console.log(error);
+
+            resultDiv.innerHTML = `
+                <p style="color:red;">
+                    Something went wrong.
+                </p>
+            `;
+        }
+
+    }
+);
+
+/* =========================
+   APPEND MESSAGE
+========================= */
+function appendMessage(message, sender) {
+
+    const div = document.createElement("div");
+
+    div.className =
+        sender === "user"
+        ? "user-message"
+        : "bot-message";
+
+    if(sender === "bot"){
+
+    typeWriterEffect(div, message);
+
+    } else {
+
+        div.innerText = message;
+    }
+
+    chatWindow.appendChild(div);
+
+    
+}
+
+async function typeWriterEffect(element, text) {
+
+    let currentText = "";
+
+    const words = text.split(" ");
+
+    for(let i = 0; i < words.length; i++) {
+
+        currentText += words[i] + " ";
+
+        element.innerHTML =marked.parse(currentText) + `<span class="typing-cursor"></span>`;
+
+        await new Promise(resolve =>
+            setTimeout(resolve, 35)
+        );
+    }
+    element.innerHTML = marked.parse(currentText);
+}
+/* =========================
+   AUTO SCROLL
+========================= */
+
+function scrollToBottom() {
+
+    chatWindow.scrollTo({
+        top: chatWindow.scrollHeight,
+        behavior: "smooth"
+    });
+}
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Hiring Analytics{% endblock %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- SAFE JINJA DATA -->
+
+<script>
+
+const analyticsData = {
+    total_applications: Number("{{ total_applications|default('0') }}"),
+    pending_review: Number("{{ pending_review|default('0') }}"),
+    interviews_scheduled: Number("{{ interviews_scheduled|default('0') }}"),
+    accepted: Number("{{ accepted|default('0') }}"),
+    rejected: Number("{{ rejected|default('0') }}")
+};
+
+</script><div style="margin-top: 20px;" class="analytics-container">
+
+    <div class="analytics-header">
+
+  <div>  <h1 class="analytics-title">
+        Hiring Analytics
+    </h1>
+
+    <p class="analytics-subtitle">
+        Real-time recruitment insights and candidate pipeline overview
+    </p></div>
+<a
+    href="{{ url_for('admin.dashboard') }}"
+    class="back-btn"
+>
+    ← Back to Dashboard
+</a>
+</div>
+
+    <div class="analytics-cards">
+
+        <div class="analytics-card">
+            <h2 id="totalApplications"></h2>
+            <p>Total Applications</p>
+        </div>
+
+        <div class="analytics-card">
+            <h2 id="pendingReview"></h2>
+            <p>Pending Review</p>
+        </div>
+
+        <div class="analytics-card">
+            <h2 id="interviewsScheduled"></h2>
+            <p>Interviews Scheduled</p>
+        </div>
+
+        <div class="analytics-card">
+            <h2 id="acceptedCount"></h2>
+            <p>Accepted</p>
+        </div>
+
+    </div>
+
+    <div class="charts-grid">
+
+        <div class="chart-card">
+
+            <h2>
+                Applications by Status
+            </h2>
+
+            <canvas id="statusChart"></canvas>
+
+        </div>
+
+        <div class="chart-card">
+
+            <h2>
+                Hiring Overview
+            </h2>
+
+            <canvas id="barChart"></canvas>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+    
+.back-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 12px 18px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.25s ease;
+    width: fit-content;
+}
+
+.back-btn:hover{
+    background: #1d4ed8;
+    transform: translateY(-2px);
+}
+.analytics-container{
+    padding: 40px;
+    background: #f5f7fb;
+    min-height: 100vh;
+}
+
+.analytics-header{
+    margin-bottom: 35px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.analytics-title{
+    font-size: 36px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.analytics-subtitle{
+    color: #64748b;
+    font-size: 16px;
+}
+
+.analytics-cards{
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+    gap: 24px;
+    margin-bottom: 35px;
+}
+
+.analytics-card{
+    background: white;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 6px 20px rgba(15,23,42,0.06);
+    border: 1px solid #e2e8f0;
+    transition: 0.25s ease;
+}
+
+.analytics-card:hover{
+    transform: translateY(-4px);
+}
+
+.analytics-card h2{
+    font-size: 42px;
+    color: #2563eb;
+    margin-bottom: 10px;
+}
+
+.analytics-card p{
+    color: #64748b;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.charts-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+}
+
+.chart-card{
+    background: white;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 6px 20px rgba(15,23,42,0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.chart-card h2{
+    font-size: 22px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 25px;
+}
+
+canvas{
+    width: 100% !important;
+    max-height: 380px;
+}
+
+.analytics-footer{
+    margin-top: 30px;
+    color: #94a3b8;
+    font-size: 14px;
+    text-align: center;
+}
+
+@media(max-width: 900px){
+
+    .charts-grid{
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media(max-width: 768px){
+
+    .analytics-container{
+        padding: 20px;
+    }
+
+    .analytics-title{
+        font-size: 28px;
+    }
+
+    .analytics-card h2{
+        font-size: 34px;
+    }
+
+}
+
+</style>
+
+<script>
+
+document.getElementById("totalApplications").innerText =
+analyticsData.total_applications;
+
+document.getElementById("pendingReview").innerText =
+analyticsData.pending_review;
+
+document.getElementById("interviewsScheduled").innerText =
+analyticsData.interviews_scheduled;
+
+document.getElementById("acceptedCount").innerText =
+analyticsData.accepted;
+
+const chartLabels = [
+    'Pending',
+    'Interview',
+    'Accepted',
+    'Rejected'
+];
+
+const chartValues = [
+    analyticsData.pending_review,
+    analyticsData.interviews_scheduled,
+    analyticsData.accepted,
+    analyticsData.rejected
+];
+
+const statusCtx =
+document.getElementById('statusChart');
+
+new Chart(statusCtx, {
+
+    type: 'pie',
+
+    data: {
+
+        labels: chartLabels,
+
+        datasets: [{
+            data: chartValues
+        }]
+    },
+
+   options:{
+    responsive:true,
+    maintainAspectRatio:false,
+    plugins:{
+        legend:{
+            position:'bottom'
+        }
+    }
+}
+
+});
+
+const barCtx =
+document.getElementById('barChart');
+
+new Chart(barCtx, {
+
+    type: 'bar',
+
+    data: {
+
+        labels: chartLabels,
+
+        datasets: [{
+            label: 'Candidates',
+            data: chartValues
+        }]
+    },
+
+   options:{
+    responsive:true,
+    
+    maintainAspectRatio:false,
+    plugins:{
+        legend:{
+            position:'bottom'
+        }
+    },
+    scales:{
+    y:{
+        beginAtZero:true
+    }
+}
+}
+});
+
+</script>
+
+{% endblock %}

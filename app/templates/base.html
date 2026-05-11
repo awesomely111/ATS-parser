@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Netsmartz Academy - AI ATS{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+        <div class="navbar-brand">
+            <h2>Netsmartz Academy</h2>
+            <span>AI-Powered ATS</span>
+        </div>
+
+        <div class="navbar-nav">
+
+            <!-- AI Chatbot Icon -->
+            <a href="{{ url_for('chatbot.chat_page') }}"
+               class="chatbot-nav-icon"
+               title="AI Recruitment Assistant">
+                
+                <div class="chatbot-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="24"
+                         height="24"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+
+                    <span class="chatbot-tooltip">
+                        AI Recruitment Assistant
+                    </span>
+                </div>
+            </a>
+
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">
+                        Dashboard
+                    </a>
+                {% endif %}
+
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">
+                    Logout
+                </a>
+
+            {% else %}
+                <a href="{{ url_for('candidate.index') }}" class="btn btn-outline">
+                    Home
+                </a>
+
+                <a href="{{ url_for('candidate.apply') }}" class="btn btn-primary">
+                    Apply
+                </a>
+
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline">
+                    Login
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Netsmartz Academy. AI-Powered Recruitment System</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

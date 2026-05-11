@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>Operations Intern Position</h1>
+        <p class="hero-subtitle">Join Netsmartz Academy and Grow Your Career</p>
+        <a href="{{ url_for('candidate.apply') }}" class="btn btn-primary btn-lg" style="margin-top: 20px;">Apply Now</a>
+    </div>
+</div>
+
+<div class="features-section">
+    <h2 style="color: rgb(71, 81, 87);JUSTIFY-CONTENT: center;
+    DISPLAY: FLEX;margin-bottom: 20PX;">AI-Powered Recruitment</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <h3 ><a class="no-underline" href="{{ url_for('chatbot.chat_page') }}">📋 Smart Resume Evaluation</h3>
+            <p>Our AI system evaluates your resume instantly.</p></a>
+        </div>
+        <div class="feature-card">
+            <h3><a class="no-underline" href="{{ url_for('chatbot.chat_page') }}">⚡ Quick Processing</h3>
+            <p>Get results within 24-48 hours.</p></a>
+        </div>
+        <div class="feature-card">
+            <h3><a class="no-underline" href="{{ url_for('chatbot.chat_page') }}">💬 Instant Support</h3>
+            <p>Use our AI chatbot for instant answers.</p></a>
+        </div>
+        <div class="feature-card">
+            <h3><a class="no-underline" href="{{ url_for('chatbot.chat_page') }}">📊 Transparent Scoring</h3>
+            <p>See exactly how you match the position.</p></a>
+        </div>
+    </div>
+</div>
+{% endblock %}
