@@ -3,18 +3,20 @@
 {% block title %}AI Recruitment Assistant{% endblock %}
 
 {% block content %}
-
 <div class="chatbot-page">
 
     <div class="chatbot-header">
 
         <div>
+
             <h1>AI Recruitment Assistant</h1>
 
             <p>
-                Ask about resumes, ATS scores, interview prep,
-                hiring process and career guidance.
+                Ask about resumes, ATS scores,
+                interview prep, hiring process
+                and career guidance.
             </p>
+
         </div>
 
         <div class="status-badge">
@@ -23,9 +25,33 @@
 
     </div>
 
-    <!-- Resume Analyzer -->
+    <!-- OPTION BUTTONS -->
 
-    <div class="resume-analysis-box">
+    <div class="feature-selection">
+
+        <button
+            class="feature-btn"
+            id="open-chat-btn">
+
+            💬 AI Chat Assistant
+
+        </button>
+
+        <button
+            class="feature-btn"
+            id="open-analyzer-btn">
+
+            📄 Resume ATS Analyzer
+
+        </button>
+
+    </div>
+
+    <!-- RESUME ANALYZER -->
+
+    <div
+        class="resume-analysis-box hidden-section"
+        id="resume-section">
 
         <h2>Resume ATS Analyzer</h2>
 
@@ -56,30 +82,36 @@
 
     </div>
 
-    <!-- Chat Window -->
+    <!-- CHAT SECTION -->
 
-    <div class="chat-window" id="chat-window">
+    <div
+        class="chat-section hidden-section"
+        id="chat-section">
 
-        <div class="bot-message">
-            👋 Hello! I'm your AI recruitment assistant.
-            How can I help you today?
+        <div class="chat-window" id="chat-window">
+
+            <div class="bot-message">
+
+                👋 Hello! I'm your AI recruitment assistant.
+                How can I help you today?
+
+            </div>
+
         </div>
 
-    </div>
+        <div class="chat-input-area">
 
-    <!-- Chat Input -->
+            <input
+                type="text"
+                id="user-input"
+                placeholder="Type your message..."
+            />
 
-    <div class="chat-input-area">
+            <button id="send-btn">
+                Send
+            </button>
 
-        <input
-            type="text"
-            id="user-input"
-            placeholder="Type your message..."
-        />
-
-        <button id="send-btn">
-            Send
-        </button>
+        </div>
 
     </div>
 
@@ -100,6 +132,39 @@ const resumeForm = document.getElementById("resume-form");
    CHATBOT
 ========================= */
 
+const openChatBtn =
+    document.getElementById("open-chat-btn");
+
+const openAnalyzerBtn =
+    document.getElementById("open-analyzer-btn");
+
+const chatSection =
+    document.getElementById("chat-section");
+
+const resumeSection =
+    document.getElementById("resume-section");
+
+/* DEFAULT OPEN CHAT */
+
+chatSection.classList.remove("hidden-section");
+
+/* BUTTON EVENTS */
+
+openChatBtn.addEventListener("click", () => {
+
+    chatSection.classList.remove("hidden-section");
+
+    resumeSection.classList.add("hidden-section");
+
+});
+
+openAnalyzerBtn.addEventListener("click", () => {
+
+    resumeSection.classList.remove("hidden-section");
+
+    chatSection.classList.add("hidden-section");
+
+});
 sendBtn.addEventListener("click", sendMessage);
 
 userInput.addEventListener("keypress", function(e) {
@@ -254,34 +319,86 @@ resumeForm.addEventListener(
 
             resultDiv.innerHTML = `
 
-                <div class="analysis-card">
+<div class="analysis-card">
 
-                    <h3>
-                        ATS Score:
-                        ${data.final_ats_score}%
-                    </h3>
+    <div class="analysis-top">
 
-                    <p>
-                        <strong>Keyword Score:</strong>
-                        ${data.keyword_score}%
-                    </p>
+        <div class="score-circle">
+            <span>${data.final_ats_score}%</span>
+            <p>ATS Score</p>
+        </div>
 
-                    <p>
-                        <strong>Semantic Score:</strong>
-                        ${data.semantic_score}%
-                    </p>
+        <div class="score-details">
 
-                    <p>
-                        <strong>Matched Keywords:</strong>
-                        ${data.matched_keywords.join(", ")}
-                    </p>
+            <div class="score-item">
 
-                    <h4>AI Analysis</h4>
-
-                    <pre>${data.ai_analysis}</pre>
-
+                <div class="score-header">
+                    <h4>Keyword Match</h4>
+                    <span>${data.keyword_score}%</span>
                 </div>
-            `;
+
+                <div class="progress-bar">
+                    <div 
+                        class="progress-fill"
+                        style="width:${data.keyword_score}%">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="score-item">
+
+                <div class="score-header">
+                    <h4>Semantic Match</h4>
+                    <span>${data.semantic_score}%</span>
+                </div>
+
+                <div class="progress-bar">
+                    <div 
+                        class="progress-fill semantic"
+                        style="width:${data.semantic_score}%">
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="keywords-section">
+
+        <h3>Matched Keywords</h3>
+
+        <div class="keyword-tags">
+
+            ${
+                data.matched_keywords.map(
+                    keyword => `
+                        <span class="keyword-tag">
+                            ${keyword}
+                        </span>
+                    `
+                ).join("")
+            }
+
+        </div>
+
+    </div>
+
+    <div class="ai-analysis-section">
+
+        <h3>AI Resume Feedback</h3>
+
+        <div class="analysis-content">
+            ${marked.parse(data.ai_analysis)}
+        </div>
+
+    </div>
+
+</div>
+
+`;
 
         } catch(error) {
 

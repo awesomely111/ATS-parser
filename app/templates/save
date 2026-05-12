@@ -1,0 +1,80 @@
+<div class="chatbot-page">
+
+    <div class="chatbot-header">
+
+        <div>
+            <h1>AI Recruitment Assistant</h1>
+
+            <p>
+                Ask about resumes, ATS scores, interview prep,
+                hiring process and career guidance.
+            </p>
+        </div>
+
+        <div class="status-badge">
+            ● AI Online
+        </div>
+
+    </div>
+
+    <!-- Resume Analyzer -->
+
+    <div class="resume-analysis-box">
+
+        <h2>Resume ATS Analyzer</h2>
+
+        <form id="resume-form">
+
+            <input
+                type="file"
+                id="resume-file"
+                name="resume"
+                accept=".pdf,.doc,.docx"
+                required
+            >
+
+            <textarea
+                id="jd-text"
+                name="jd"
+                placeholder="Paste Job Description Here..."
+                required
+            ></textarea>
+
+            <button type="submit">
+                Analyze Resume
+            </button>
+
+        </form>
+
+        <div id="analysis-result"></div>
+
+    </div>
+
+    <!-- Chat Window -->
+
+    <div class="chat-window" id="chat-window">
+
+        <div class="bot-message">
+            👋 Hello! I'm your AI recruitment assistant.
+            How can I help you today?
+        </div>
+
+    </div>
+
+    <!-- Chat Input -->
+
+    <div class="chat-input-area">
+
+        <input
+            type="text"
+            id="user-input"
+            placeholder="Type your message..."
+        />
+
+        <button id="send-btn">
+            Send
+        </button>
+
+    </div>
+
+</div>
